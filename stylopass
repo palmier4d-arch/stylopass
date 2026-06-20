@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyloPass - Style par partie de texte</title>
+    <style>
+        :root {
+            --bg: #08080f;
+            --card: #111118;
+            --border: #252535;
+            --text: #d0d0d8;
+            --accent: #7c3aed;
+            --accent2: #06b6d4;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(124, 58, 237, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.04) 0%, transparent 50%);
+        }
+
+        .app {
+            width: 100%;
+            max-width: 850px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Texte maître */
+        .master-text-section {
+            background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(6,182,212,0.08));
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .master-text-label {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .master-text-input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            color: white;
+            font-size: 1.6em;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            outline: none;
+            letter-spacing: 1px;
+        }
+
+        .master-text-input:focus {
+            border-color: var(--accent2);
+            box-shadow: 0 0 15px rgba(6,182,212,0.15);
+        }
+
+        /* Barre d'outils de style */
+        .style-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 14px;
+            background: rgba(0,0,0,0.25);
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+
+        .style-toolbar .group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 0 8px;
+            border-right: 1px solid var(--border);
+        }
+
+        .style-toolbar .group:last-child {
+            border-right: none;
+        }
+
+        .style-toolbar label {
+            font-size: 0.7em;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-right: 2px;
+        }
+
+        .style-toolbar select,
+        .style-toolbar input[type="color"] {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .style-toolbar input[type="color"] {
+            width: 34px;
+            height: 30px;
+            padding: 2px;
+        }
+
+        .btn {
+            padding: 7px 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            border-color: #555;
+            background: #1a1a25;
+        }
+
+        .btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            font-weight: 600;
+            padding: 10px 18px;
+            font-size: 0.9em;
+        }
+
+        .btn.success {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .btn.danger {
+            background: transparent;
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn.small {
+            padding: 4px 8px;
+            font-size: 0.7em;
+        }
+
+        /* Zone des parties */
+        .parts-zone {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+            padding: 20px;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 16px 0;
+            position: relative;
+        }
+
+        .part-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            position: relative;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .part-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        }
+
+        .part-tag.selected {
+            border-color: white !important;
+            box-shadow: 0 0 25px currentColor;
+            z-index: 10;
+        }
+
+        .part-tag .part-delete {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.65em;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .part-tag:hover .part-delete,
+        .part-tag.selected .part-delete {
+            display: flex;
+        }
+
+        .part-tag .part-style-badges {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 3px;
+            font-size: 0.55em;
+            white-space: nowrap;
+        }
+
+        .part-tag .mini-badge {
+            background: rgba(0,0,0,0.7);
+            padding: 2px 6px;
+            border-radius: 8px;
+            color: #aaa;
+        }
+
+        /* Séparateur visuel entre les parties */
+        .part-separator {
+            color: #444;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Message d'aide */
+        .help-text {
+            text-align: center;
+            color: #555;
+            font-size: 0.8em;
+            margin-top: 6px;
+        }
+
+        /* Aperçu complet */
+        .full-preview {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .full-preview-label {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .full-preview-text {
+            font-size: 2em;
+            font-weight: bold;
+            transition: all 0.3s;
+            padding: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* Hash */
+        .hash-box {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hash-box .hash-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .hash-box .label {
+            font-size: 0.7em;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hash-box .hash {
+            color: var(--success);
+            font-size: 0.9em;
+            word-break: break-all;
+            margin-top: 4px;
+        }
+
+        .btn-copy {
+            padding: 10px 20px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-copy:hover {
+            background: #0ea374;
+        }
+
+        .btn-copy.copied {
+            background: #555;
+        }
+
+        /* Grille des profils */
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .profile-card {
+            background: rgba(255,255,255,0.02);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .profile-card:hover {
+            border-color: #555;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .profile-card.active {
+            border-color: var(--accent);
+            background: rgba(124,58,237,0.08);
+        }
+
+        .profile-card .profile-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .profile-card .profile-preview-mini {
+            font-size: 0.9em;
+            padding: 8px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .profile-card .btn-delete-profile {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 1.1em;
+        }
+
+        .profile-card:hover .btn-delete-profile {
+            opacity: 1;
+        }
+
+        .profile-card .btn-delete-profile:hover {
+            color: var(--danger);
+        }
+
+        .add-profile-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px dashed var(--border);
+            background: transparent;
+            color: #666;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+
+        .add-profile-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(124,58,237,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .card { padding: 16px; }
+            .profiles-grid { grid-template-columns: 1fr; }
+            .style-toolbar { flex-direction: column; align-items: stretch; }
+            .style-toolbar .group { border-right: none; border-bottom: 1px solid var(--border); padding: 6px 0; }
+            .full-preview-text { font-size: 1.3em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- TEXTE MAÎTRE -->
+    <div class="card">
+        <div class="master-text-section">
+            <div class="master-text-label">🔑 Votre texte maître</div>
+            <input 
+                type="text" 
+                class="master-text-input" 
+                id="masterText" 
+                value="moncef.mebarek"
+                placeholder="Votre texte (ex: moncef.mebarek)"
+                autocomplete="off"
+            >
+            <div class="help-text">
+                💡 Séparez les parties par un <b>espace</b> ou un <b>point</b> pour les styliser indépendamment
+            </div>
+        </div>
+    </div>
+
+    <!-- ÉDITEUR DE STYLE PAR PARTIE -->
+    <div class="card">
+        <div class="card-title">
+            <span class="icon">🎨</span> Stylisez chaque partie de votre texte
+        </div>
+
+        <!-- Les parties détectées -->
+        <div style="margin-bottom: 8px; font-size: 0.8em; color: #888;">
+            Cliquez sur une partie pour la sélectionner, puis appliquez un style :
+        </div>
+        <div class="parts-zone" id="partsZone">
+            <!-- Rempli dynamiquement -->
+        </div>
+
+        <!-- Barre d'outils -->
+        <div class="style-toolbar" id="styleToolbar">
+            <div class="group">
+                <label>Police</label>
+                <select id="fontSelect">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Impact">Impact</option>
+                    <option value="Comic Sans MS">Comic Sans MS</option>
+                    <option value="Trebuchet MS">Trebuchet MS</option>
+                </select>
+            </div>
+            <div class="group">
+                <label>Couleur</label>
+                <input type="color" id="colorPicker" value="#ffffff">
+            </div>
+            <div class="group">
+                <label>Taille</label>
+                <input type="range" id="sizeSlider" min="10" max="40" value="16" style="width:70px;">
+                <span id="sizeValue" style="font-size:0.75em;">16px</span>
+            </div>
+            <div class="group">
+                <button class="btn" id="btnBold" title="Gras"><b>G</b></button>
+                <button class="btn" id="btnItalic" title="Italique"><i>I</i></button>
+                <button class="btn" id="btnUnderline" title="Souligné"><u>S</u></button>
+                <button class="btn" id="btnStrikethrough" title="Barré"><s>B</s></button>
+            </div>
+            <div class="group">
+                <label>Casse</label>
+                <select id="caseSelect">
+                    <option value="normal">Normale</option>
+                    <option value="upper">MAJUSCULES</option>
+                    <option value="lower">minuscules</option>
+                </select>
+            </div>
+            <div class="group">
+                <button class="btn" id="btnReverse" title="Inverser">🔄</button>
+            </div>
+            <div class="group">
+                <button class="btn success small" id="btnApplyToAll">Appliquer à tout</button>
+            </div>
+        </div>
+
+        <!-- Aperçu complet -->
+        <div class="full-preview">
+            <div class="full-preview-label">👁️ Aperçu du mot de passe formaté</div>
+            <div class="full-preview-text" id="fullPreview"></div>
+        </div>
+
+        <!-- Hash -->
+        <div class="hash-box">
+            <div class="hash-info">
+                <div class="label">🔒 Hash unique généré</div>
+                <div class="hash" id="profileHash">—</div>
+            </div>
+            <button class="btn-copy" id="btnCopyHash">📋 Copier le hash</button>
+        </div>
+    </div>
+
+    <!-- MES PROFILS -->
+    <div class="card">
+        <div class="card-title">
+            <span class="icon">🗂️</span> Mes profils enregistrés
+        </div>
+
+        <div class="profiles-grid" id="profilesGrid">
+            <!-- Rempli dynamiquement -->
+        </div>
+
+        <button class="add-profile-btn" id="btnAddProfile">
+            + Ajouter ce style comme nouveau profil
+        </button>
+    </div>
+
+</div>
+
+<script>
+    // ============================================================
+    // STYLOPASS — Style par partie de texte
+    // ============================================================
+
+    class StyloPassApp {
+        constructor() {
+            this.masterText = 'moncef mebarek';
+            this.parts = []; // { id, text, style }
+            this.selectedPartId = null;
+            this.profiles = this.loadProfiles();
+            this.editingProfileId = null;
+            this.init();
+        }
+
+        defaultStyle() {
+            return {
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontSize: 16,
+                bold: false,
+                italic: false,
+                underline: false,
+                strikethrough: false,
+                textCase: 'normal',
+                reversed: false
+            };
+        }
+
+        randomStyle() {
+            const fonts = ['Arial','Times New Roman','Courier New','Georgia','Verdana','Impact','Comic Sans MS','Trebuchet MS'];
+            const colors = ['#ffffff','#ff6b6b','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#feca57','#7bed9f','#ff6348','#ffd93d'];
+            const cases = ['normal','upper','lower'];
+            return {
+                fontFamily: fonts[Math.floor(Math.random() * fonts.length)],
+                color: colors[Math.floor(Math.random() * colors.length)],
+                fontSize: 14 + Math.floor(Math.random() * 16),
+                bold: Math.random() > 0.55,
+                italic: Math.random() > 0.6,
+                underline: Math.random() > 0.7,
+                strikethrough: Math.random() > 0.85,
+                textCase: cases[Math.floor(Math.random() * cases.length)],
+                reversed: Math.random() > 0.8
+            };
+        }
+
+        // Découpage du texte en parties
+        parseParts(text) {
+            // Diviser par espaces et points, en gardant les points comme séparateurs visuels
+            const rawParts = text.split(/(\s+|\.)/).filter(p => p.trim() !== '');
+            // Filtrer les espaces purs, garder les points
+            const cleaned = [];
+            for (const p of rawParts) {
+                if (p === '.' || p.trim() === '') {
+                    if (p === '.') cleaned.push({ text: '.', isSeparator: true });
+                    continue;
+                }
+                if (p.trim()) cleaned.push({ text: p.trim(), isSeparator: false });
+            }
+            return cleaned;
+        }
+
+        // Mise à jour depuis le texte maître
+        updatePartsFromMaster() {
+            const parsed = this.parseParts(this.masterText);
+            const oldParts = [...this.parts];
+            this.parts = [];
+
+            parsed.forEach((item, index) => {
+                if (item.isSeparator) {
+                    // Le séparateur est juste visuel, pas stylisable
+                    return;
+                }
+                // Garder le style existant si la partie existait déjà
+                const existing = oldParts.find(p => p.text === item.text && !p._used);
+                if (existing) {
+                    existing._used = true;
+                    this.parts.push(existing);
+                } else {
+                    this.parts.push({
+                        id: 'part-' + Date.now() + '-' + index,
+                        text: item.text,
+                        style: this.randomStyle() // Style aléatoire pour commencer
+                    });
+                }
+            });
+
+            if (this.parts.length === 0) {
+                this.parts.push({
+                    id: 'part-default',
+                    text: this.masterText || 'Texte',
+                    style: this.defaultStyle()
+                });
+            }
+
+            if (this.selectedPartId && !this.parts.find(p => p.id === this.selectedPartId)) {
+                this.selectedPartId = this.parts[0]?.id || null;
+            }
+            if (!this.selectedPartId && this.parts.length > 0) {
+                this.selectedPartId = this.parts[0].id;
+            }
+        }
+
+        getSelectedPart() {
+            return this.parts.find(p => p.id === this.selectedPartId);
+        }
+
+        applyCase(text, textCase) {
+            switch (textCase) {
+                case 'upper': return text.toUpperCase();
+                case 'lower': return text.toLowerCase();
+                default: return text;
+            }
+        }
+
+        applyReverse(text) {
+            return text.split('').reverse().join('');
+        }
+
+        getStyledText(style, text) {
+            let t = text;
+            if (style.reversed) t = this.applyReverse(t);
+            t = this.applyCase(t, style.textCase);
+            return t;
+        }
+
+        getFullStyledText() {
+            return this.parts.map(p => this.getStyledText(p.style, p.text)).join('');
+        }
+
+        generateHash() {
+            const canonicalParts = this.parts.map((p, i) => {
+                const s = p.style;
+                const t = this.getStyledText(s, p.text);
+                return [
+                    `p${i}:t:${t}`,
+                    `fn:${s.fontFamily}`,
+                    `c:${s.color}`,
+                    `fs:${s.fontSize}`,
+                    `b:${s.bold?1:0}`,
+                    `i:${s.italic?1:0}`,
+                    `u:${s.underline?1:0}`,
+                    `st:${s.strikethrough?1:0}`,
+                    `tc:${s.textCase}`,
+                    `rev:${s.reversed?1:0}`
+                ].join('|');
+            });
+
+            const canonical = canonicalParts.join('||');
+
+            let hash = 0;
+            for (let i = 0; i < canonical.length; i++) {
+                hash = ((hash << 5) - hash) + canonical.charCodeAt(i);
+                hash |= 0;
+            }
+            const h1 = (hash >>> 0).toString(16).padStart(8, '0');
+            const h2 = ((hash * 31 + 7) >>> 0).toString(16).padStart(8, '0');
+            const h3 = ((hash * 17 + 13) >>> 0).toString(16).padStart(8, '0');
+            const h4 = ((hash * 41 + 3) >>> 0).toString(16).padStart(8, '0');
+            return `${h1}${h2}${h3}${h4}`;
+        }
+
+        // ============================================================
+        // RENDU
+        // ============================================================
+
+        renderParts() {
+            const zone = document.getElementById('partsZone');
+            zone.innerHTML = '';
+
+            this.parts.forEach((part, index) => {
+                const style = part.style;
+                const text = this.getStyledText(style, part.text);
+
+                const tag = document.createElement('span');
+                tag.className = 'part-tag' + (part.id === this.selectedPartId ? ' selected' : '');
+                tag.dataset.partId = part.id;
+                tag.textContent = text;
+                tag.style.fontFamily = style.fontFamily;
+                tag.style.color = style.color;
+                tag.style.fontSize = style.fontSize + 'px';
+                tag.style.fontWeight = style.bold ? 'bold' : 'normal';
+                tag.style.fontStyle = style.italic ? 'italic' : 'normal';
+                tag.style.textDecoration = [
+                    style.underline ? 'underline' : '',
+                    style.strikethrough ? 'line-through' : ''
+                ].filter(Boolean).join(' ') || 'none';
+                tag.style.backgroundColor = 'rgba(0,0,0,0.4)';
+
+                // Badges
+                const badges = [];
+                if (style.bold) badges.push('G');
+                if (style.italic) badges.push('I');
+                if (style.underline) badges.push('S');
+                if (style.reversed) badges.push('↔');
+                if (style.textCase === 'upper') badges.push('MAJ');
+                if (style.textCase === 'lower') badges.push('min');
+                if (badges.length > 0) {
+                    const badgeDiv = document.createElement('span');
+                    badgeDiv.className = 'part-style-badges';
+                    badgeDiv.innerHTML = badges.map(b => `<span class="mini-badge">${b}</span>`).join('');
+                    tag.appendChild(badgeDiv);
+                }
+
+                // Bouton supprimer
+                const delBtn = document.createElement('button');
+                delBtn.className = 'part-delete';
+                delBtn.textContent = '×';
+                delBtn.title = 'Supprimer cette partie';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.deletePart(part.id);
+                });
+                tag.appendChild(delBtn);
+
+                tag.addEventListener('click', () => this.selectPart(part.id));
+                zone.appendChild(tag);
+
+                // Séparateur visuel entre les parties
+                if (index < this.parts.length - 1) {
+                    const sep = document.createElement('span');
+                    sep.className = 'part-separator';
+                    sep.textContent = '•';
+                    sep.style.pointerEvents = 'none';
+                    zone.appendChild(sep);
+                }
+            });
+
+            this.updateFullPreview();
+            this.updateHash();
+            this.updateToolbarState();
+        }
+
+        updateFullPreview() {
+            const preview = document.getElementById('fullPreview');
+            preview.innerHTML = '';
+
+            this.parts.forEach((part, index) => {
+                const span = document.createElement('span');
+                const text = this.getStyledText(part.style, part.text);
+                span.textContent = text;
+                span.style.fontFamily = part.style.fontFamily;
+                span.style.color = part.style.color;
+                span.style.fontSize = part.style.fontSize + 'px';
+                span.style.fontWeight = part.style.bold ? 'bold' : 'normal';
+                span.style.fontStyle = part.style.italic ? 'italic' : 'normal';
+                span.style.textDecoration = [
+                    part.style.underline ? 'underline' : '',
+                    part.style.strikethrough ? 'line-through' : ''
+                ].filter(Boolean).join(' ') || 'none';
+                preview.appendChild(span);
+
+                if (index < this.parts.length - 1) {
+                    const dot = document.createElement('span');
+                    dot.textContent = '';
+                    dot.style.margin = '0 4px';
+                    dot.style.color = '#555';
+                    preview.appendChild(dot);
+                }
+            });
+        }
+
+        updateHash() {
+            document.getElementById('profileHash').textContent = this.generateHash();
+        }
+
+        updateToolbarState() {
+            const part = this.getSelectedPart();
+            if (!part) return;
+
+            document.getElementById('fontSelect').value = part.style.fontFamily;
+            document.getElementById('colorPicker').value = part.style.color;
+            document.getElementById('sizeSlider').value = part.style.fontSize;
+            document.getElementById('sizeValue').textContent = part.style.fontSize + 'px';
+            document.getElementById('btnBold').classList.toggle('active', part.style.bold);
+            document.getElementById('btnItalic').classList.toggle('active', part.style.italic);
+            document.getElementById('btnUnderline').classList.toggle('active', part.style.underline);
+            document.getElementById('btnStrikethrough').classList.toggle('active', part.style.strikethrough);
+            document.getElementById('caseSelect').value = part.style.textCase;
+            document.getElementById('btnReverse').classList.toggle('active', part.style.reversed);
+        }
+
+        renderProfiles() {
+            const grid = document.getElementById('profilesGrid');
+
+            if (this.profiles.length === 0) {
+                grid.innerHTML = '<div style="text-align:center;padding:30px;color:#555;">📭 Aucun profil enregistré. Stylisez votre texte et cliquez sur "Ajouter comme nouveau profil".</div>';
+                return;
+            }
+
+            grid.innerHTML = this.profiles.map(p => {
+                const previewText = p.parts.map(part => this.getStyledText(part.style, part.text)).join('');
+                const hashPreview = this.generateHashForProfile(p);
+
+                return `
+                    <div class="profile-card ${this.editingProfileId === p.id ? 'active' : ''}" data-id="${p.id}">
+                        <button class="btn-delete-profile" data-delete="${p.id}" title="Supprimer">×</button>
+                        <div class="profile-name">${p.name}</div>
+                        <div class="profile-preview-mini" style="
+                            font-family: ${p.parts[0]?.style.fontFamily || 'Arial'};
+                            color: ${p.parts[0]?.style.color || '#fff'};
+                        ">${previewText.substring(0, 25)}${previewText.length > 25 ? '...' : ''}</div>
+                        <div style="font-size:0.65em;color:#555;margin-top:4px;">${p.parts.length} partie(s) • Hash: ${hashPreview.substring(0,8)}...</div>
+                    </div>
+                `;
+            }).join('');
+
+            grid.querySelectorAll('.profile-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.dataset.delete) return;
+                    this.loadProfile(card.dataset.id);
+                });
+            });
+
+            grid.querySelectorAll('.btn-delete-profile').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.deleteProfile(btn.dataset.delete);
+                });
+            });
+        }
+
+        generateHashForProfile(profile) {
+            const canonicalParts = profile.parts.map((p, i) => {
+                const s = p.style;
+                const t = this.getStyledText(s, p.text);
+                return [`p${i}:t:${t}`,`fn:${s.fontFamily}`,`c:${s.color}`,`fs:${s.fontSize}`,`b:${s.bold?1:0}`,`i:${s.italic?1:0}`,`u:${s.underline?1:0}`,`st:${s.strikethrough?1:0}`,`tc:${s.textCase}`,`rev:${s.reversed?1:0}`].join('|');
+            });
+            const canonical = canonicalParts.join('||');
+            let hash = 0;
+            for (let i = 0; i < canonical.length; i++) { hash = ((hash << 5) - hash) + canonical.charCodeAt(i); hash |= 0; }
+            return `${(hash>>>0).toString(16).padStart(8,'0')}${((hash*31+7)>>>0).toString(16).padStart(8,'0')}${((hash*17+13)>>>0).toString(16).padStart(8,'0')}${((hash*41+3)>>>0).toString(16).padStart(8,'0')}`;
+        }
+
+        // ============================================================
+        // ACTIONS
+        // ============================================================
+
+        selectPart(id) {
+            this.selectedPartId = id;
+            this.renderParts();
+        }
+
+        deletePart(id) {
+            if (this.parts.length <= 1) {
+                this.showToast('⚠️ Gardez au moins une partie');
+                return;
+            }
+            this.parts = this.parts.filter(p => p.id !== id);
+            if (this.selectedPartId === id) {
+                this.selectedPartId = this.parts[0]?.id || null;
+            }
+            this.renderParts();
+        }
+
+        updateSelectedPartStyle(prop, value) {
+            const part = this.getSelectedPart();
+            if (!part) return;
+            part.style[prop] = value;
+            this.renderParts();
+        }
+
+        toggleSelectedPartStyle(prop) {
+            const part = this.getSelectedPart();
+            if (!part) return;
+            part.style[prop] = !part.style[prop];
+            this.renderParts();
+        }
+
+        applyStyleToAll() {
+            const part = this.getSelectedPart();
+            if (!part) return;
+            const style = { ...part.style };
+            this.parts.forEach(p => { p.style = { ...style }; });
+            this.renderParts();
+            this.showToast('✅ Style appliqué à toutes les parties');
+        }
+
+        // ============================================================
+        // PROFILS
+        // ============================================================
+
+        loadProfiles() {
+            try {
+                const data = localStorage.getItem('stylopass_v2_profiles');
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        saveProfiles() {
+            localStorage.setItem('stylopass_v2_profiles', JSON.stringify(this.profiles));
+        }
+
+        addProfile() {
+            if (this.parts.length === 0) {
+                this.showToast('⚠️ Créez au moins une partie de texte');
+                return;
+            }
+
+            const name = prompt('Nom du compte ?\nEx: 🏦 Banque, 📧 Gmail, 🎬 Netflix...');
+            if (!name) return;
+
+            const profile = {
+                id: Date.now().toString(),
+                name: name,
+                masterText: this.masterText,
+                parts: JSON.parse(JSON.stringify(this.parts)),
+                createdAt: new Date().toISOString()
+            };
+
+            this.profiles.push(profile);
+            this.saveProfiles();
+            this.renderProfiles();
+            this.showToast('✅ Profil "' + name + '" enregistré !');
+        }
+
+        loadProfile(id) {
+            const profile = this.profiles.find(p => p.id === id);
+            if (!profile) return;
+
+            this.editingProfileId = id;
+            this.masterText = profile.masterText;
+            this.parts = JSON.parse(JSON.stringify(profile.parts));
+            this.selectedPartId = this.parts[0]?.id || null;
+
+            document.getElementById('masterText').value = this.masterText;
+            this.renderParts();
+            this.renderProfiles();
+            this.showToast('📂 Profil "' + profile.name + '" chargé');
+        }
+
+        deleteProfile(id) {
+            const profile = this.profiles.find(p => p.id === id);
+            if (!confirm(`Supprimer le profil "${profile?.name || '?'}" ?`)) return;
+
+            this.profiles = this.profiles.filter(p => p.id !== id);
+            if (this.editingProfileId === id) {
+                this.editingProfileId = null;
+            }
+            this.saveProfiles();
+            this.renderProfiles();
+            this.showToast('🗑️ Profil supprimé');
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+
+        init() {
+            // Texte maître
+            const masterInput = document.getElementById('masterText');
+            masterInput.addEventListener('input', () => {
+                this.masterText = masterInput.value || 'moncef.mebarek';
+                this.updatePartsFromMaster();
+                this.renderParts();
+                this.editingProfileId = null;
+                this.renderProfiles();
+            });
+
+            this.updatePartsFromMaster();
+            this.renderParts();
+            this.renderProfiles();
+
+            // Outils
+            document.getElementById('fontSelect').addEventListener('change', (e) => this.updateSelectedPartStyle('fontFamily', e.target.value));
+            document.getElementById('colorPicker').addEventListener('input', (e) => this.updateSelectedPartStyle('color', e.target.value));
+            document.getElementById('sizeSlider').addEventListener('input', (e) => {
+                document.getElementById('sizeValue').textContent = e.target.value + 'px';
+                this.updateSelectedPartStyle('fontSize', parseInt(e.target.value));
+            });
+            document.getElementById('btnBold').addEventListener('click', () => this.toggleSelectedPartStyle('bold'));
+            document.getElementById('btnItalic').addEventListener('click', () => this.toggleSelectedPartStyle('italic'));
+            document.getElementById('btnUnderline').addEventListener('click', () => this.toggleSelectedPartStyle('underline'));
+            document.getElementById('btnStrikethrough').addEventListener('click', () => this.toggleSelectedPartStyle('strikethrough'));
+            document.getElementById('caseSelect').addEventListener('change', (e) => this.updateSelectedPartStyle('textCase', e.target.value));
+            document.getElementById('btnReverse').addEventListener('click', () => this.toggleSelectedPartStyle('reversed'));
+            document.getElementById('btnApplyToAll').addEventListener('click', () => this.applyStyleToAll());
+
+            // Copie hash
+            document.getElementById('btnCopyHash').addEventListener('click', () => {
+                const hash = this.generateHash();
+                navigator.clipboard.writeText(hash).then(() => {
+                    const btn = document.getElementById('btnCopyHash');
+                    btn.textContent = '✅ Copié !';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = '📋 Copier le hash';
+                        btn.classList.remove('copied');
+                    }, 2000);
+                    this.showToast('📋 Hash copié dans le presse-papiers');
+                }).catch(() => {
+                    this.showToast('❌ Erreur lors de la copie');
+                });
+            });
+
+            // Ajout profil
+            document.getElementById('btnAddProfile').addEventListener('click', () => this.addProfile());
+
+            // Raccourci clavier Ctrl+C pour copier le hash
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'h') {
+                    e.preventDefault();
+                    const hash = this.generateHash();
+                    navigator.clipboard.writeText(hash).then(() => {
+                        this.showToast('📋 Hash copié (Ctrl+H)');
+                    });
+                }
+            });
+        }
+
+        showToast(msg) {
+            const existing = document.querySelector('.toast-msg');
+            if (existing) existing.remove();
+
+            const el = document.createElement('div');
+            el.className = 'toast-msg';
+            el.style.cssText = `
+                position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+                background: #1f1f2e; color: white; padding: 12px 24px;
+                border-radius: 30px; z-index: 999; font-size: 0.9em;
+                border: 1px solid #333; pointer-events: none;
+                animation: toastIn 0.3s ease;
+            `;
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transition = 'opacity 0.3s';
+                setTimeout(() => el.remove(), 300);
+            }, 2000);
+        }
+    }
+
+    const toastStyle = document.createElement('style');
+    toastStyle.textContent = '@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }';
+    document.head.appendChild(toastStyle);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        window.styloApp = new StyloPassApp();
+        console.log('🔐 StyloPass v2 — Style par partie de texte');
+        console.log('   🎨 Cliquez sur une partie, appliquez un style');
+        console.log('   ⌨️ Ctrl+H pour copier le hash');
+    });
+</script>
+
+</body>
+</html>
